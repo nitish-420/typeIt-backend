@@ -1,0 +1,27 @@
+CREATE TABLE Users(
+    id int(5) PRIMARY KEY AUTO_INCREMENT ,
+	userName varchar(15),
+    fName varchar(20),
+    lName varchar(20),
+    email varchar(30),
+    password varchar(50),
+    numberOfTestsGiven int(5) DEFAULT 0,
+    totalTimeSpend int(6) DEFAULT 0,
+    dateOfAccountCreated date,
+    bestSpeed int(3) DEFAULT 0,
+    averageSpeed int(3) DEFAULT 0,
+    bestAccuracy int(2) DEFAULT 0,
+    averageAccuracy int(2) DEFAULT 0
+    
+    
+);
+
+
+INSERT INTO Users 
+VALUES (1,"nitish420","Nitish","Bhardwaj","nitish420@gmail.com","12345",0,0,"2021-12-11",0,0,0,0)
+
+for inserting data for amit password 123456 token is result is :
+    {
+    "success": true,
+    "authtoken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0fSwiaWF0IjoxNjM5MjUzODI1fQ.nCAcT8bZZAOQbonER546_Ccj1sXaENqM0S0xBS7d3vY"
+    }
