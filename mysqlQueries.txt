@@ -25,3 +25,17 @@ for inserting data for amit password 123456 token is result is :
     "success": true,
     "authtoken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjo0fSwiaWF0IjoxNjM5MjUzODI1fQ.nCAcT8bZZAOQbonER546_Ccj1sXaENqM0S0xBS7d3vY"
     }
+
+Other Tables :
+
+CREATE TABLE CTable(
+    testId int(5) PRIMARY KEY AUTO_INCREMENT ,
+	userId int(5) NOT NULL,
+    testTime int(3) NOT NULL,
+    timeOfTest date NOT NULL,
+    speed int(3) NOT NULL,
+    accuracy int(3) NOT NULL,
+   	FOREIGN KEY (userId) REFERENCES Users(id)
+);
+
+similarly made all other tables.
