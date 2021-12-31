@@ -74,19 +74,16 @@ router.post("/login",[
             if(!rows.length){
                 return res.status(400).json({success,error:"Please try to login with correct credentials"})
             }
-            // console.log(1)
             const user=rows[0]
             const passwordCompare=await bcrypt.compare(password,user.password);
             if(!passwordCompare){
                 return res.status(400).json({success,error:"Please try to login with correct credentials"})
             }
-            // console.log(2)
             const data={
                 user:{
                     id:user.id
                 }
             }
-            // console.log(3)
 
             const authtoken=jwt.sign(data,JWT_SECRET)
             success=true
@@ -103,15 +100,32 @@ router.post("/login",[
 
 // Route 3 for logged in user details using post req /getuser
 router.post('/getuser',fetchuser,async (req,res)=>{
+    let success=false
     try{
         let userId=req.user.id;
         let rows=await query(`Select * from Users where id="${userId}"`)
 
         let user= rows[0]
-        // above line -password will neglect password while sending
-        res.send(user)
+        success=true
+        res.send({success,user})
     }catch(error){
-        console.error(error.message);
+        // console.error(error.message);
+        throw res.status(500).send("Inter Server error occured");
+    }
+
+})
+
+// Route 4 for logged in user update using post req /updateuser
+router.post('/updateuser',fetchuser,async (req,res)=>{
+    let success=false
+    try{
+        let userId=req.user.id;
+        let {numberOfTestsGiven,totalTimeSpend,bestSpeed,averageSpeed,bestAccuracy,averageAccuracy}=req.body
+        let row=await query(`Update Users SET numberOfTestsGiven="${numberOfTestsGiven}", totalTimeSpend="${totalTimeSpend}", bestSpeed="${bestSpeed}", bestAccuracy="${bestAccuracy}", averageSpeed="${averageSpeed}", averageAccuracy="${averageAccuracy}" where id="${userId}"`)
+        success=true
+        res.send({success})
+    }catch(error){
+        // console.error(error.message);
         throw res.status(500).send("Inter Server error occured");
     }
 
