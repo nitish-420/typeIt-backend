@@ -125,7 +125,7 @@ router.post("/getuserall",fetchuser,async (req,res)=>{
 )
 
 
-router.post("/getall",fetchuser,async (req,res)=>{
+router.post("/getall",async (req,res)=>{
         let success=false;
         try{
             const language=req.body.language;
