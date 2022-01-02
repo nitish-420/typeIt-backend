@@ -138,16 +138,16 @@ router.post("/getall",async (req,res)=>{
             }
 
             final.time15=await query(`
-            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=15 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC LIMIT 50)
             `)
             final.time30=await query(`
-            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=30 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=30 ) sub WHERE row_num = 1 ORDER BY speed DESC LIMIT 50)
             `)
             final.time60=await query(`
-            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=60 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=60 ) sub WHERE row_num = 1 ORDER BY speed DESC LIMIT 50)
             `)
             final.time120=await query(`
-            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=120 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=120 ) sub WHERE row_num = 1 ORDER BY speed DESC LIMIT 50)
             `)
 
             success=true;
@@ -179,8 +179,9 @@ UNION
 UNION
 (SELECT * from EnglishTable a WHERE a.testTime=120 and a.userId=7 ORDER BY a.speed DESC LIMIT 1)
 
-
+SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM EnglishTable a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC LIMIT 50
 
 */
 
 module.exports=router
+
