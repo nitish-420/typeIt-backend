@@ -138,16 +138,16 @@ router.post("/getall",async (req,res)=>{
             }
 
             final.time15=await query(`
-            (SELECT b.userName,a.testTime,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=15 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=15 ORDER BY a.speed DESC LIMIT 50)
             `)
             final.time30=await query(`
-            (SELECT b.userName,a.testTime,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=30 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=30 ORDER BY a.speed DESC LIMIT 50)
             `)
             final.time60=await query(`
-            (SELECT b.userName,a.testTime,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=60 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=60 ORDER BY a.speed DESC LIMIT 50)
             `)
             final.time120=await query(`
-            (SELECT b.userName,a.testTime,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=120 ORDER BY a.speed DESC LIMIT 50)
+            (SELECT b.userName,a.timeOfTest,a.speed,a.accuracy from ${language}Table a INNER JOIN Users b on a.userId=b.id WHERE a.testTime=120 ORDER BY a.speed DESC LIMIT 50)
             `)
 
             success=true;
