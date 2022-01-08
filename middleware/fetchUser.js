@@ -1,6 +1,9 @@
+if(process.env.NODE_ENV!='production'){
+    require('dotenv').config();
+}
 const jwt=require('jsonwebtoken')
 
-const JWT_SECRET="process.env.SECRET";
+const JWT_SECRET=process.env.SECRET;
 
 
 const fetchuser=async (req,res,next)=>{

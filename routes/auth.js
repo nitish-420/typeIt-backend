@@ -5,12 +5,17 @@ const {body,validationResult}=require('express-validator')
 const bcrypt=require('bcryptjs')
 
 const jwt=require('jsonwebtoken')
-const JWT_SECRET="process.env.SECRET"
+const JWT_SECRET=process.env.SECRET
 
 const fetchuser=require("../middleware/fetchUser")
+/*
 const connection = require('../db')
 const util = require('util');
 const query = util.promisify(connection.query).bind(connection);
+
+use above to make connection without pool and change all pool.query with pool
+*/
+const pool = require("../pool")
 
 
 // Route 1 to create a new user
@@ -30,7 +35,7 @@ router.post("/createuser",[
 
         try{
 
-            let rows=await query(`Select * from Users where email="${req.body.email}"`);
+            let rows=await pool.query(`Select * from Users where email="${req.body.email}"`);
             if(rows.length){
                 return res.status(400).json({success,error:"Sorry a user with this email already registered with our site"})
             }
@@ -70,7 +75,7 @@ router.post("/login",[
         }
         const {email,password}=req.body;
         try{
-            let rows=await query(`Select * from Users where email="${req.body.email}"`);
+            let rows=await pool.query(`Select * from Users where email="${req.body.email}"`);
             if(!rows.length){
                 return res.status(400).json({success,error:"Please try to login with correct credentials"})
             }
@@ -103,7 +108,7 @@ router.post('/getuser',fetchuser,async (req,res)=>{
     let success=false
     try{
         let userId=req.user.id;
-        let rows=await query(`Select * from Users where id="${userId}"`)
+        let rows=await pool.query(`Select * from Users where id="${userId}"`)
 
         let user= rows[0]
         success=true
@@ -121,7 +126,7 @@ router.post('/updateuser',fetchuser,async (req,res)=>{
     try{
         let userId=req.user.id;
         let {numberOfTestsGiven,totalTimeSpend,bestSpeed,averageSpeed,bestAccuracy,averageAccuracy}=req.body
-        let row=await query(`Update Users SET numberOfTestsGiven="${numberOfTestsGiven}", totalTimeSpend="${totalTimeSpend}", bestSpeed="${bestSpeed}", bestAccuracy="${bestAccuracy}", averageSpeed="${averageSpeed}", averageAccuracy="${averageAccuracy}" where id="${userId}"`)
+        let row=await pool.query(`Update Users SET numberOfTestsGiven="${numberOfTestsGiven}", totalTimeSpend="${totalTimeSpend}", bestSpeed="${bestSpeed}", bestAccuracy="${bestAccuracy}", averageSpeed="${averageSpeed}", averageAccuracy="${averageAccuracy}" where id="${userId}"`)
         success=true
         res.send({success})
     }catch(error){

@@ -4,10 +4,14 @@ const router=express.Router()
 const {body,validationResult}=require('express-validator')
 
 const fetchuser=require("../middleware/fetchUser")
+/*
 const connection = require('../db')
 const util = require('util');
 const query = util.promisify(connection.query).bind(connection);
 
+use above to make connection without pool and change all pool.query with pool
+*/
+const pool = require("../pool")
 
 router.post("/createtest",fetchuser,[
     body('time','Not a valid time option').isLength({max:3}),
@@ -21,7 +25,7 @@ router.post("/createtest",fetchuser,[
         
     
         try{
-            let result=await query(`INSERT INTO ${language}Table(userId,testTime,speed,accuracy) VALUES(${req.user.id},${req.body.testTime},${req.body.speed},${req.body.accuracy})`)
+            let result=await pool.query(`INSERT INTO ${language}Table(userId,testTime,speed,accuracy) VALUES(${req.user.id},${req.body.testTime},${req.body.speed},${req.body.accuracy})`)
             // console.log(result);
             success=true;
             res.json({success})
@@ -45,7 +49,7 @@ router.post("/getbest",fetchuser,[
         }
         const language=req.body.language;
         try{
-            let result=await query(`
+            let result=await pool.query(`
             (SELECT a.testTime,a.timeOfTest,a.speed,a.accuracy from ${language}Table a WHERE a.testTime=15 and a.userId=${req.user.id} ORDER BY a.speed DESC LIMIT 1)
             UNION
             (SELECT a.testTime,a.timeOfTest,a.speed,a.accuracy from ${language}Table a WHERE a.testTime=30 and a.userId=${req.user.id} ORDER BY a.speed DESC LIMIT 1)
@@ -94,7 +98,7 @@ router.post("/getbest",fetchuser,[
 router.post("/getuserall",fetchuser,async (req,res)=>{
         let success=false;
         try{
-            let result=await query(`
+            let result=await pool.query(`
             SELECT testTime,timeOfTest,speed,accuracy,language FROM (
             (SELECT * from EnglishTable a WHERE a.userId=${req.user.id} )
             UNION
@@ -139,16 +143,16 @@ router.post("/getall",async (req,res)=>{
                 time120:null
             }
 
-            final.time15=await query(`
+            final.time15=await pool.query(`
             (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC )
             `)
-            final.time30=await query(`
+            final.time30=await pool.query(`
             (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=30 ) sub WHERE row_num = 1 ORDER BY speed DESC )
             `)
-            final.time60=await query(`
+            final.time60=await pool.query(`
             (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=60 ) sub WHERE row_num = 1 ORDER BY speed DESC )
             `)
-            final.time120=await query(`
+            final.time120=await pool.query(`
             (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=120 ) sub WHERE row_num = 1 ORDER BY speed DESC )
             `)
 
