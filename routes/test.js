@@ -18,6 +18,8 @@ router.post("/createtest",fetchuser,[
             return res.status(400).json({success,errors})
         }
         const language=req.body.language;
+        
+    
         try{
             let result=await query(`INSERT INTO ${language}Table(userId,testTime,speed,accuracy) VALUES(${req.user.id},${req.body.testTime},${req.body.speed},${req.body.accuracy})`)
             // console.log(result);
@@ -26,7 +28,7 @@ router.post("/createtest",fetchuser,[
 
         }
         catch(error){
-            // console.error(error.message);
+            console.error(error.message);
             res.status(500).send("Some error occured");
         }
     }
@@ -161,7 +163,7 @@ router.post("/getall",async (req,res)=>{
 
         }
         catch(error){
-            // console.error(error.message);
+            console.error(error.message);
             res.status(500).send("Some error occured");
         }
     }
@@ -184,4 +186,3 @@ SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.a
 */
 
 module.exports=router
-
