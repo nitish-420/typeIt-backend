@@ -143,16 +143,16 @@ router.post("/getall",async (req,res)=>{
                 time120:null
             }
             final.time15=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC,timeOfTest ASC )
             `)
             final.time30=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=30 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=30 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC,timeOfTest ASC )
             `)
             final.time60=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=60 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=60 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC,timeOfTest ASC )
             `)
             final.time120=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=120 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=120 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC,timeOfTest ASC )
             `)
 
             success=true;
