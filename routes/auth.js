@@ -34,17 +34,18 @@ router.post("/createuser",[
         }
 
         try{
-
             let rows=await pool.query(`Select * from Users where email="${req.body.email}"`);
             if(rows.length){
                 return res.status(400).json({success,error:"Sorry a user with this email already registered with our site"})
             }
+            
+            
             const salt=await bcrypt.genSalt(10);
             const secPass= await bcrypt.hash(req.body.password,salt)
-            // console.log(`Insert into Users ("userName","fName","lName","email","password","dateOfAccountCreated") VALUES ("${req.body.userName}","${req.body.fName}","${req.body.lName}","${req.body.email}","${secPass}","${new Date().toISOString().split('T')[0]}")`)
-            rows=await query(`Insert into Users (userName,fName,lName,email,password,dateOfAccountCreated)
-                VALUES ("${req.body.userName}","${req.body.fName}","${req.body.lName}","${req.body.email}","${secPass}","${new Date().toISOString().split('T')[0]}")`)
-
+            // console.log(`Insert into Users(userName,fName,lName,email,password,dateOfAccountCreated) VALUES ("${req.body.userName}","${req.body.fName}","${req.body.lName}","${req.body.email}","${secPass}","${new Date().toISOString().split('T')[0]}")`)
+            rows=await pool.query(`Insert into Users(userName,fName,lName,email,password,dateOfAccountCreated)
+                VALUES("${req.body.userName}","${req.body.fName}","${req.body.lName}","${req.body.email}","${secPass}","${new Date().toISOString().split('T')[0]}")`)
+            
             const data={
                 user:{
                     id:rows.insertId
