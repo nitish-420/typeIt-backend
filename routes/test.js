@@ -142,18 +142,17 @@ router.post("/getall",async (req,res)=>{
                 time60:null,
                 time120:null
             }
-
             final.time15=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
             `)
             final.time30=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=30 ) sub WHERE row_num = 1 ORDER BY speed DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=30 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
             `)
             final.time60=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=60 ) sub WHERE row_num = 1 ORDER BY speed DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=60 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
             `)
             final.time120=await pool.query(`
-            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=120 ) sub WHERE row_num = 1 ORDER BY speed DESC )
+            (SELECT id,userName,speed,accuracy,timeOfTest FROM ( SELECT b.id, b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM ${language}Table a INNER JOIN Users b on a.userId=b.id and a.testTime=120 ) sub WHERE row_num = 1 ORDER BY speed DESC,accuracy DESC )
             `)
 
             success=true;
@@ -167,7 +166,7 @@ router.post("/getall",async (req,res)=>{
 
         }
         catch(error){
-            console.error(error.message);
+            // console.error(error.message);
             res.status(500).send("Some error occured");
         }
     }
@@ -186,6 +185,7 @@ UNION
 (SELECT * from EnglishTable a WHERE a.testTime=120 and a.userId=7 ORDER BY a.speed DESC LIMIT 1)
 
 SELECT userName,speed,accuracy,timeOfTest FROM ( SELECT b.userName, a.speed, a.accuracy,a.timeOfTest, ROW_NUMBER() OVER(PARTITION BY a.userId ORDER BY a.speed desc,a.accuracy desc)row_num FROM EnglishTable a INNER JOIN Users b on a.userId=b.id and a.testTime=15 ) sub WHERE row_num = 1 ORDER BY speed DESC LIMIT 50
+
 
 */
 
