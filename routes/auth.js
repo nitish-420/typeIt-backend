@@ -20,11 +20,11 @@ const pool = require("../pool")
 
 // Route 1 to create a new user
 router.post("/createuser",[
-    body('fName','Enter a valid first name').isLength({min:3}),
-    body('userName','Enter a valid username').isLength({min:3}),
-    body('lName','Enter a valid last name').isLength({min:3}),
+    body('fName','Name should have atleast length 3 and atmost length 20').isLength({min:3,max:20}),
+    body('userName','Username should have atleast length 3 and atmost length 15').isLength({min:3,max:15}),
+
     body('email','Enter a valid email').isEmail(),
-    body('password','Password must be atleast 5 character').isLength({min:5}),//this all are express validators
+    body('password','Password must be atleast 5 character').isLength({min:5,max:20}),//this all are express validators
     ],async (req,res)=>{
         
         let success=false;
