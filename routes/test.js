@@ -175,6 +175,7 @@ router.post("/getall",async (req,res)=>{
 
 
 /*
+INSERT INTO CTable(userId,testTime,speed,accuracy) VALUES(5,15,40,80)
 
 (SELECT * from EnglishTable a WHERE a.testTime=15 and a.userId=7 ORDER BY a.speed DESC LIMIT 1)
 UNION

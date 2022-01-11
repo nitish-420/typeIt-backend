@@ -11,7 +11,7 @@ var pool = mysql.createPool({
 	user: process.env.USER,
 	password: process.env.PASSWORD,
 	database: process.env.DATABASE,
-	// multipleStatements: true,
+	multipleStatements: true,
 	connectionLimit:process.env.CONNECTIONPOOLLIMIT,
 	timezone:"local",
 	debug:false,

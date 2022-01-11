@@ -127,7 +127,7 @@ router.post("/login",[
 
             if(user.status===0){
                 sendEmailForVerification(email);
-                return res.status(400).json({success,error:"Please verify your account first and then login, email has been sended again, check you spam box also in case you don't find it"})
+                return res.status(400).json({success,error:"Please verify your account first and then login, email has been set again, check you spam box also in case you don't find it"})
             }
 
             const data={
@@ -144,7 +144,7 @@ router.post("/login",[
 
         }catch(error){
             // console.error(error.message);
-            res.status(500).send("Inter Server error occured");
+            res.status(500).send("Internal Server error occured");
         }
 
     }
@@ -162,7 +162,7 @@ router.post('/getuser',fetchuser,async (req,res)=>{
         res.send({success,user})
     }catch(error){
         // console.error(error.message);
-        throw res.status(500).send("Inter Server error occured");
+        res.status(500).send("Inter Server error occured");
     }
 
 })
@@ -178,9 +178,72 @@ router.post('/updateuser',fetchuser,async (req,res)=>{
         res.send({success})
     }catch(error){
         // console.error(error.message);
-        throw res.status(500).send("Inter Server error occured");
+        res.status(500).send("Inter Server error occured");
     }
     
+})
+
+// Route 5 for logged in user update of name username all that 
+router.post('/updateusernames',fetchuser,[
+    body('fName','Name should have atleast length 3 and atmost length 20').isLength({min:3,max:20}),
+    body('userName','Username should have atleast length 3 and atmost length 15').isLength({min:3,max:15}),
+    body('password','Password must be atleast 5 character').isLength({min:5,max:20}),//this all are express validators
+    ],async (req,res)=>{
+        
+        let success=false
+        const errors=validationResult(req)
+        if(!errors.isEmpty()){
+            return res.status(400).json({success,errors})
+        }
+        try{
+            let userId=req.user.id;
+            let {userName,fName,lName}=req.body
+            let row=await pool.query(`Update Users SET userName="${userName}", fName="${fName}", lName="${lName}" where id="${userId}"`)
+            success=true
+            res.send({success})
+        }catch(error){
+            // console.error(error.message);
+            res.status(500).send("Inter Server error occured");
+        }
+})
+
+// Route 6 for logged in user update password
+router.post('/updatepassword',fetchuser,[
+    body('currPassword','Password must be atleast 5 character').isLength({min:5,max:20}),//this all are express validators
+    body('updatedPassword','Password must be atleast 5 character').isLength({min:5,max:20}),//this all are express validators
+
+    ],async (req,res)=>{
+        let success=false
+
+        const errors=validationResult(req)
+        if(!errors.isEmpty()){
+            return res.status(400).json({success,errors})
+        }
+
+        try{
+            let userId=req.user.id;
+            let {currPassword,updatedPassword}=req.body
+            let rows=await pool.query(`Select * from Users where id="${userId}"`);
+            if(!rows.length){
+                return res.status(400).json({success,error:"Something went wrong"})
+            }
+            const user=rows[0]
+            const passwordCompare=await bcrypt.compare(currPassword,user.password);
+            if(!passwordCompare){
+                return res.status(400).json({success,error:"Something went wrong"})
+            }
+            
+            const salt=await bcrypt.genSalt(10);
+            const secPass= await bcrypt.hash(updatedPassword,salt)
+
+            let row=await pool.query(`Update Users SET password="${secPass}" where id="${userId}"`)
+
+            success=true
+            res.send({success})
+        }catch(error){
+            // console.error(error.message);
+            res.status(500).send("Inter Server error occured");
+        }
 })
 
 router.get("/verifyemail/:id",fetchemail,async(req,res)=>{
@@ -197,6 +260,27 @@ router.get("/verifyemail/:id",fetchemail,async(req,res)=>{
     }
 
     // res.send(req.email)
+})
+
+router.get("/deleteuser",fetchuser,async(req,res)=>{
+    try{
+        let userId=req.user.id;
+        let success=false;
+        let row = await pool.query(
+            `DELETE FROM EnglishTable WHERE userId=${userId};
+            DELETE FROM CTable WHERE userId=${userId};
+            DELETE FROM PythonTable WHERE userId=${userId};
+            DELETE FROM JavaTable WHERE userId=${userId};
+            DELETE FROM JavascriptTable WHERE userId=${userId};
+            DELETE FROM Users WHERE id=${userId}
+            `
+        )
+        success=true;
+        res.send({success})
+    }
+    catch(e){
+        res.status(500).send("Internal Server error occured");
+    }
 })
 
 module.exports=router
