@@ -39,8 +39,8 @@ const sendEmailForVerification=async(email)=>{
     const options={
         from:process.env.EMAILUSERNAME,
         to:email,
-        subject:"To verify click on the link below",
-        text:`https://type-it-backend.herokuapp.com/api/auth/verifyemail/${emailHash}`
+        subject:"Email verification of TypeIt",
+        html:`<h2>Click on <a href="https://type-it-backend.herokuapp.com/api/auth/verifyemail/${emailHash}">this</a> link to verify your account</h2>`
     };
 
     transporter.sendMail(options,function(err,info){
@@ -151,7 +151,7 @@ router.post("/login",[
 
             if(user.status===0){
                 sendEmailForVerification(email);
-                return res.status(400).json({success,error:"Please verify your account first and then login, email has been set again, check you spam box also in case you don't find it"})
+                return res.status(400).json({success,error:"Please verify your account first and then login, email has been sent again, check you spam box also in case you don't find it"})
             }
 
             let passwordCompare=await bcrypt.compare(password,user.password);
