@@ -303,7 +303,7 @@ router.get("/verifyemail/:id",fetchemail,async(req,res)=>{
     // res.send(req.email)
 })
 
-router.get("/deleteuser",fetchuser,[
+router.post("/deleteuser",fetchuser,[
     body('currPassword','Password must be atleast 5 character').isLength({min:5,max:20}),//this all are express validators
     ],
     async(req,res)=>{
@@ -344,7 +344,7 @@ router.get("/deleteuser",fetchuser,[
         }
 })
 
-router.get("/forgotpassword",[
+router.post("/forgotpassword",[
     body('email','Enter a valid email').isEmail()],
     async (req,res)=>{
         let success=false;
@@ -377,7 +377,7 @@ router.get("/forgotpassword",[
 
             success=true
             // console.log(user)
-            res.json({success})
+            res.send({success})
 
         }catch(error){
             // console.error(error.message);
