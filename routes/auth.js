@@ -11,6 +11,8 @@ const fetchuser=require("../middleware/fetchUser")
 const fetchemail = require('../middleware/fetchEmail')
 
 const transporter=require("../nodeMailer")
+var passwordGenerator = require('generate-password');
+var otpSet={}
 
 /*
 const connection = require('../db')
@@ -49,6 +51,31 @@ const sendEmailForVerification=async(email)=>{
         // console.log("Sent : "+info.response);
     })
     return;
+}
+
+const sendNewPasswordEmail=async(email,password)=>{
+
+    const options={
+        from:process.env.EMAILUSERNAME,
+        to:email,
+        subject:"New password for your typeit account",
+        html:`<p>Your new password is <b>${password}</b> , it will expire in few minutes, login with it and to change to new password visit edit options available in user section at typeit.</p>`
+    };
+
+    transporter.sendMail(options,function(err,info){
+        if(err){
+            // console.log(err);
+            return;
+        }
+        // console.log("Sent : "+info.response);
+    })
+    return;
+}
+
+const deleteOtpAfterGivenTime=(email)=>{
+    setTimeout(()=>{
+        delete otpSet[email]
+    },300000)
 }
 
 // Route 1 to create a new user
@@ -114,20 +141,32 @@ router.post("/login",[
             return res.status(400).json({success,errors:errors.array()})
         }
         const {email,password}=req.body;
+        const otp=otpSet[email]
         try{
             let rows=await pool.query(`Select * from Users where email="${req.body.email}"`);
             if(!rows.length){
                 return res.status(400).json({success,error:"Please try to login with correct credentials"})
             }
             const user=rows[0]
-            const passwordCompare=await bcrypt.compare(password,user.password);
-            if(!passwordCompare){
-                return res.status(400).json({success,error:"Please try to login with correct credentials"})
-            }
 
             if(user.status===0){
                 sendEmailForVerification(email);
                 return res.status(400).json({success,error:"Please verify your account first and then login, email has been set again, check you spam box also in case you don't find it"})
+            }
+
+            let passwordCompare=await bcrypt.compare(password,user.password);
+            
+            if(!passwordCompare && otp===undefined){
+                return res.status(400).json({success,error:"Please try to login with correct credentials"})
+            }
+            else if(!passwordCompare){
+                passwordCompare=await bcrypt.compare(password,otp)
+                if(!passwordCompare){
+                    return res.status(400).json({success,error:"Please try to login with correct credentials"})
+                }
+                else{
+                    let row=await pool.query(`Update Users SET password="${otp}" where id="${user.id}"`)
+                }
             }
 
             const data={
@@ -139,6 +178,7 @@ router.post("/login",[
             const authtoken=jwt.sign(data,JWT_SECRET)
             success=true
             // console.log(user)
+            // delete otpSet[req.body.email]
             res.json({success,authtoken,user})
 
 
@@ -237,6 +277,8 @@ router.post('/updatepassword',fetchuser,[
 
             let row=await pool.query(`Update Users SET password="${secPass}" where id="${userId}"`)
 
+            delete otpSet[user.email]
+
             success=true
             res.send({success})
         }catch(error){
@@ -261,25 +303,88 @@ router.get("/verifyemail/:id",fetchemail,async(req,res)=>{
     // res.send(req.email)
 })
 
-router.get("/deleteuser",fetchuser,async(req,res)=>{
-    try{
-        let userId=req.user.id;
-        let success=false;
-        let row = await pool.query(
-            `DELETE FROM EnglishTable WHERE userId=${userId};
-            DELETE FROM CTable WHERE userId=${userId};
-            DELETE FROM PythonTable WHERE userId=${userId};
-            DELETE FROM JavaTable WHERE userId=${userId};
-            DELETE FROM JavascriptTable WHERE userId=${userId};
-            DELETE FROM Users WHERE id=${userId}
-            `
-        )
-        success=true;
-        res.send({success})
-    }
-    catch(e){
-        res.status(500).send("Internal Server error occured");
-    }
+router.get("/deleteuser",fetchuser,[
+    body('currPassword','Password must be atleast 5 character').isLength({min:5,max:20}),//this all are express validators
+    ],
+    async(req,res)=>{
+        let success=false
+        const errors=validationResult(req)
+        if(!errors.isEmpty()){
+            return res.status(400).json({success,errors})
+        }
+
+        try{
+            let userId=req.user.id;
+            let {currPassword}=req.body
+
+            let rows=await pool.query(`Select * from Users where id="${userId}"`);
+            if(!rows.length){
+                return res.status(400).json({success,error:"Something went wrong"})
+            }
+            const user=rows[0]
+            const passwordCompare=await bcrypt.compare(currPassword,user.password);
+            if(!passwordCompare){
+                return res.status(400).json({success,error:"Something went wrong"})
+            }
+
+            let row = await pool.query(
+                `DELETE FROM EnglishTable WHERE userId=${userId};
+                DELETE FROM CTable WHERE userId=${userId};
+                DELETE FROM PythonTable WHERE userId=${userId};
+                DELETE FROM JavaTable WHERE userId=${userId};
+                DELETE FROM JavascriptTable WHERE userId=${userId};
+                DELETE FROM Users WHERE id=${userId}
+                `
+            )
+            success=true;
+            res.send({success})
+        }
+        catch(e){
+            res.status(500).send("Internal Server error occured");
+        }
 })
+
+router.get("/forgotpassword",[
+    body('email','Enter a valid email').isEmail()],
+    async (req,res)=>{
+        let success=false;
+        const errors=validationResult(req);
+        if(! errors.isEmpty()){
+            return res.status(400).json({success,errors:errors.array()})
+        }
+        const {email}=req.body;
+        try{
+            let rows=await pool.query(`Select * from Users where email="${req.body.email}"`);
+            if(!rows.length){
+                return res.status(400).json({success,error:"Invali Credentials"})
+            }
+            const user=rows[0]
+
+            var newPassword =await passwordGenerator.generate({
+                length: 14,
+                numbers: true,
+                symbols:true,
+                strict:true,
+                excludeSimilarCharacters:true
+            });
+            sendNewPasswordEmail(req.body.email,newPassword)
+
+            const salt=await bcrypt.genSalt(10);
+            const secPass= await bcrypt.hash(newPassword,salt)
+            
+            otpSet[email]=secPass
+            deleteOtpAfterGivenTime(email)
+
+            success=true
+            // console.log(user)
+            res.json({success})
+
+        }catch(error){
+            // console.error(error.message);
+            res.status(500).send("Internal Server error occured");
+        }
+
+    }
+)
 
 module.exports=router

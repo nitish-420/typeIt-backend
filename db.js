@@ -11,16 +11,14 @@ var connection = mysql.createConnection({
     password: process.env.PASSWORD,
     database: process.env.DATABASE,
     timezone:"local",
-    
-    
 
 });
 
 connection.connect(function (err) {
 	
     if (err) {
+		console.log(err)
       	throw err;
-		// console.log(err.message)
     }
 
     console.log("connected!");
